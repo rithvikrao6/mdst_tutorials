@@ -17,22 +17,35 @@ Once you are finished with this program, you should run `python preprocess.py` f
 This should load the data, perform preprocessing, and save the output to the data folder.
 
 """
+import pandas as pd
+
 
 def remove_percents(df, col):
-    return df
+    return df[col].str.rstrip('%')
+
+
 
 def fill_zero_iron(df):
-    return df
+    return df['Iron (% DV)'].fillna(0)
+
     
 def fix_caffeine(df):
+    df.dropna()
+    varies_index = df[df['Caffeine (mg)'] == 'varies'].index
+    Varies_index = df[df['Caffeine (mg)'] == 'Varies'].index
+    df.drop(varies_index, inplace=True)
+    df.drop(Varies_index, inplace=True)
     return df
 
 def standardize_names(df):
+    df.columns = df.columns.str.lower()
+    df.columns = df.columns.str.replace(r"\(.*\)","")
     return df
 
 def fix_strings(df, col):
-    return df
-
+    df[col] = df[col].str.lower()
+    df[col] = df[col].str.replace('[^a-zA-Z ]', '')
+    return df[col]
 
 def main():
     
@@ -43,11 +56,11 @@ def main():
     # complete the remove_percents function to remove the percent symbol and convert the columns to a numeric type
     pct_DV = ['Vitamin A (% DV)', 'Vitamin C (% DV)', 'Calcium (% DV)', 'Iron (% DV)']
     for col in pct_DV:
-        df = remove_percents(df, col)
+        df[col] = remove_percents(df, col)
     
     # the column 'Iron (% DV)' has missing values when the drink has no iron
     # complete the fill_zero_iron function to fix this
-    df = fill_zero_iron(df)
+    df['Iron (% DV)'] = fill_zero_iron(df)
 
     # the column 'Caffeine (mg)' has some missing values and some 'varies' values
     # complete the fix_caffeine function to deal with these values
@@ -58,7 +71,7 @@ def main():
     # complete the fix_strings function to convert these strings to lowercase and remove non-alphabet characters
     names = ['Beverage_category', 'Beverage']
     for col in names:
-        df = fix_strings(df, col)
+        df[col] = fix_strings(df, col)
     
     # the column names in this data are clear but inconsistent
     # complete the standardize_names function to convert all column names to lower case and remove the units (in parentheses)
@@ -67,6 +80,7 @@ def main():
     # now that the data is all clean, save your output to the `data` folder as 'starbucks_clean.csv'
     # you will use this file in checkpoint 2
     
+    df.to_csv('../data/starbucks_clean.csv')
     
 
 if __name__ == "__main__":
